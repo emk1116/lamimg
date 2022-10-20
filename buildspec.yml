@@ -1,0 +1,24 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:  
+        - echo Build started on `date` 
+        - aws --version
+        - AWS_ACCOUNT_ID=752323630246
+        - REPOSITORY=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+        - REPOSITORY_URI=$REPOSITORY/bsnklambda  
+        - echo Logging in to Amazon ECR.....
+        - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REPOSITORY  
+  build:
+    commands:
+        - sam build        
+  post_build:        
+    commands:
+        - sam package         
+           --output-template-file package.yaml
+           --image-repository $REPOSITORY_URI
+        - echo Build completed on `date`
+artifacts:
+  files:  
+    - package.yaml
